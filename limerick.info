@@ -1,0 +1,6 @@
+name = "Limerick Migration"
+description = "Code to migrate Limerick's Digital Assets"
+dependencies[] = islandora
+package = Limerick
+core = 7.x
+version = 7.x-dev

@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * Hooks to implement migration.
+ */
+
+/**
+ * Implenets hook_menu().
+ */
+function limerick_menu() {
+  $items = array();
+  $items['limerick/migrate/book'] = array(
+    'title' => 'Book Migrations',
+    'description' => 'Migrates single identified book',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('limerick_migrate_book_form'),
+    'file' => 'includes/limerick_book.inc',
+    'access arguments' => array('access content'),
+  );
+  $items['limerick/migrate/postcards'] = array(
+    'title' => 'Migrate Postcards',
+    'description' => 'Migrates Post Card Collection',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('limerick_migrate_postcard_form'),
+    'file' => 'includes/limerick_postcard.inc',
+    'access arguments' => array('access content'),
+  );
+  $items['limerick/migrate/images'] = array(
+    'title' => 'Migrate Simple Collections',
+    'description' => 'Migrates Unnested Image Collections',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('limerick_migrate_image_form'),
+    'file' => 'includes/limerick_image.inc',
+    'access arguments' => array('access content'),
+  );
+  $items['limerick/migrate/collection'] = array(
+    'title' => 'Migrate Nested Collections',
+    'description' => 'Migrates Nested Image Collections',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('limerick_migrate_collection_form'),
+    'file' => 'includes/limerick_collection.inc',
+    'access arguments' => array('access content'),
+  );
+
+  return $items;
+}
