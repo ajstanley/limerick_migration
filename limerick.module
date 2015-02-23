@@ -6,7 +6,7 @@
  */
 
 /**
- * Implenets hook_menu().
+ * Implements hook_menu().
  */
 function limerick_menu() {
   $items = array();

@@ -59,9 +59,9 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
     $subPath = $iterator->getSubPathName();
     if ($item->isDir()) {
       $dirs[] = $subPath;
-    }
+      }
     else {
-      $ext = pathinfo($subpath);
+      $ext = pathinfo($subPath);
       if (in_array($ext, array ('tif', 'tiff'))) {
         $files[] = $subPath;
       }
