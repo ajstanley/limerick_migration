@@ -41,6 +41,19 @@ function limerick_migrate_book_form($form, &$form_state) {
 }
 
 /**
+ * Validation handler.
+ *
+ * @param array $form
+ *   Drupal Form
+ * @param array $form_state
+ *   Drupal form state
+ */
+function limerick_migrate_book_form_validate($form, &$form_state) {
+  if (!is_dir($form_state['values']['book_dir'])) {
+    form_set_error('book_dir', t('Not a valid path'));
+  }
+}
+/**
  * Submit handler.
  *
  * @param array $form
@@ -75,7 +88,7 @@ function limerick_migrate_book_form_submit(&$form, &$form_state) {
  * @param string $parent_collection
  *   Collection pid for created book
  *
- * @return Abstract Object
+ * @return AbstractObject
  *   Book Object
  */
 function limerick_contruct_book($namespace, $title, $parent_collection) {

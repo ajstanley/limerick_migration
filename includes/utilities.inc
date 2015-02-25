@@ -1,9 +1,8 @@
 <?php
 
-/*
-  /**
+/**
  * @file
- * Utiltiy functions for migration.
+ * Utility migration functions.
  */
 
 /**

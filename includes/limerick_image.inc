@@ -41,6 +41,20 @@ function limerick_migrate_image_form($form, &$form_state) {
 }
 
 /**
+ * Validation handler.
+ *
+ * @param array $form
+ *   Drupal Form
+ * @param array $form_state
+ *   Drupal form state
+ */
+function limerick_migrate_image_form_validate($form, &$form_state) {
+  if (!is_dir($form_state['values']['source_dir'])) {
+    form_set_error('source_dir', t('Not a valid path'));
+  }
+}
+
+/**
  * Submit handler.
  *
  * @param array $form
@@ -70,7 +84,7 @@ function limerick_migrate_image_form_submit($form, &$form_state) {
         'tiff' => $tiff,
         'collection_pid' => $collection_pid,
         'namespace' => $namespace,
-    ));
+      ));
   }
   batch_set($batch);
   batch_process();
@@ -83,8 +97,10 @@ function limerick_migrate_image_form_submit($form, &$form_state) {
  *
  * @param string $tiff
  *   Path to
- * @param type $collection_pid
- * @param type $namespace
+ * @param string $collection_pid
+ *   PID of collection
+ * @param string $namespace
+ *   Namespace for ingested object
  */
 function limerick_create_image($tiff, $collection_pid, $namespace) {
   module_load_include('inc', 'limerick', 'includes/utilities');
@@ -98,13 +114,13 @@ function limerick_create_image($tiff, $collection_pid, $namespace) {
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:sp_large_image_cmodel');
   $object->label = pathinfo($tiff, PATHINFO_FILENAME);
   $object->owner = $user->name;
-// Add OBJ
+  // Add OBJ.
   $ds = $object->constructDatastream('OBJ', 'M');
   $object->ingestDatastream($ds);
   $ds->setContentFromFile($tiff, FALSE);
   $ds->label = 'OBJ';
   $ds->mimetype = "image/tiff";
-  // Add mods
+  // Add mods.
   limerick_add_mods($object, $mods_path);
   islandora_add_object($object);
 }

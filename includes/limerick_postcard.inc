@@ -41,6 +41,20 @@ function limerick_migrate_postcard_form($form, &$form_state) {
 }
 
 /**
+ * Validation handler.
+ *
+ * @param array $form
+ *   Drupal Form
+ * @param array $form_state
+ *   Drupal form state
+ */
+function limerick_migrate_postcard_form_validate($form, &$form_state) {
+  if (!is_dir($form_state['values']['source_dir'])) {
+    form_set_error('source_dir', t('Not a valid path'));
+  }
+}
+
+/**
  * Submit handler.
  *
  * @param array $form
@@ -73,14 +87,15 @@ function limerick_migrate_postcard_form_submit($form, &$form_state) {
         'tiff' => $tiff,
         'collection_pid' => $collection_pid,
         'namespace' => $namespace,
-    ));
+      ),
+    );
   }
   batch_set($batch);
   batch_process();
 }
 
 /**
- * Creates compund object related postcard objects.
+ * Creates compound object related postcard objects.
  *
  * @global type $user
  *
@@ -99,7 +114,7 @@ function limerick_create_postcard($recto_path, $collection_pid, $namespace) {
   $verso_path = str_replace("A.tif", 'B.tif', $recto_path);
   $paths = array($recto_path, $verso_path);
   $mods_path = pathinfo($recto_path, PATHINFO_FILENAME) . '/MODS';
-// Build Compound object
+  // Build Compound object.
   $tuque = new IslandoraTuque();
   $label = substr(pathinfo($recto_path, PATHINFO_FILENAME), 0, strlen($label) - 1);
   $compound_object = $tuque->repository->constructObject($namespace);
@@ -115,6 +130,8 @@ function limerick_create_postcard($recto_path, $collection_pid, $namespace) {
   limerick_add_mods($compound_object, "$mods_path/{$label}.xml");
   $compound_object = islandora_add_object($compound_object);
   $objects = array();
+
+  // Add both images as member objects.
   foreach ($paths as $path) {
     $label = pathinfo($path, PATHINFO_FILENAME);
     $object = $tuque->repository->constructObject($namespace);
@@ -122,7 +139,7 @@ function limerick_create_postcard($recto_path, $collection_pid, $namespace) {
     $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:sp_large_image_cmodel');
     $object->label = $label;
     $object->owner = $user->name;
-// Add OBJ
+    // Add OBJ.
     $ds = $object->constructDatastream('OBJ', 'M');
     $object->ingestDatastream($ds);
     $ds->setContentFromFile($path, FALSE);

@@ -41,6 +41,20 @@ function limerick_migrate_collection_form($form, &$form_state) {
 }
 
 /**
+ * Validation handler.
+ *
+ * @param array $form
+ *   Drupal Form
+ * @param array $form_state
+ *   Drupal form state
+ */
+function limerick_migrate_collection_form_validate($form, &$form_state) {
+  if (!is_dir($form_state['values']['source_dir'])) {
+    form_set_error('source_dir', t('Not a valid path'));
+  }
+}
+
+/**
  * Submit handler.
  *
  * @param array $form
@@ -56,14 +70,14 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
   $files = array();
   foreach ($iterator = new RecursiveIteratorIterator(
   new RecursiveDirectoryIterator($source_path, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $item) {
-    $subPath = $iterator->getSubPathName();
+    $subpath = $iterator->getSubPathName();
     if ($item->isDir()) {
-      $dirs[] = $subPath;
-      }
+      $dirs[] = $subpath;
+    }
     else {
-      $ext = pathinfo($subPath);
-      if (in_array($ext, array ('tif', 'tiff'))) {
-        $files[] = $subPath;
+      $ext = pathinfo($subpath);
+      if (in_array($ext, array('tif', 'tiff'))) {
+        $files[] = $subpath;
       }
     }
   }
@@ -79,7 +93,7 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
         'dir' => $dir,
         'namespace' => $namespace,
         'collection_pid' => $collection_pid,
-      )
+      ),
     );
   }
   foreach ($files as $file) {
@@ -88,13 +102,25 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
         'namespace' => $namespace,
         'collection_pid' => $collection_pid,
         'source_path' => $source_path,
-      )
+      ),
     );
   }
   batch_set($batch);
   batch_process();
 }
 
+/**
+ * Creates directory object.
+ *
+ * @global user $user
+ *
+ * @param string $dir
+ *   Dir anme
+ * @param string $namespace
+ *   Namespace for created object
+ * @param string $collection_pid
+ *   PID of parent collection
+ */
 function limerick_create_dir($dir, $namespace, $collection_pid) {
   global $user;
   $dir_parts = explode('/', $dir);
@@ -118,6 +144,20 @@ function limerick_create_dir($dir, $namespace, $collection_pid) {
   islandora_add_object($object);
 }
 
+/**
+ * Creates object from file.
+ *
+ * @global user $user
+ *
+ * @param string $file
+ *   File name
+ * @param string $namespace
+ *   Namespace of ingested object
+ * @param syring $collection_pid
+ *   PID of collection
+ * @param string $source_path
+ *   File Path
+ */
 function limerick_create_collection_file($file, $namespace, $collection_pid, $source_path) {
   module_load_include('inc', 'limerick', 'includes/utilities');
 
