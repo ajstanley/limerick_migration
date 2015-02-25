@@ -50,9 +50,13 @@ function limerick_migrate_book_form($form, &$form_state) {
  */
 function limerick_migrate_book_form_validate($form, &$form_state) {
   if (!is_dir($form_state['values']['book_dir'])) {
-    form_set_error('book_dir', t('Not a valid path'));
+    form_set_error('book_dir', t('Not a valid file path.'));
+  }
+  if (!islandora_object_load($form_state['values']['collection'])) {
+    form_set_error('collection', t('Collection does not exist.'));
   }
 }
+
 /**
  * Submit handler.
  *
