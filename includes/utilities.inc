@@ -19,6 +19,7 @@ function limerick_add_mods(&$object, $mods_path) {
     $dom = new DOMDocument();
     $dom->loadXML($raw_mods);
     $xpath = new DomXpath($dom);
+    $xpath->registerNamespace('mods', 'http://www.loc.gov/mods/v3');
     $titles = $xpath->query('//mods/titleInfo/title');
     $label = $titles->item(0)->nodeValue;
     if ($label) {
