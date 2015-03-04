@@ -76,6 +76,7 @@ function limerick_migrate_image_form_submit($form, &$form_state) {
       $tiffs[] = "$source_path/$filename";
     }
   }
+  sort($tiffs);
   $batch = array(
     'title' => t('Adding Images'),
     'operations' => array(),

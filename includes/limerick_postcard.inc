@@ -79,6 +79,7 @@ function limerick_migrate_postcard_form_submit($form, &$form_state) {
       }
     }
   }
+  sort($tiffs);
   $batch = array(
     'title' => t('Adding Postcards'),
     'operations' => array(),

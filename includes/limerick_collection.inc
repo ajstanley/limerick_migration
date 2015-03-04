@@ -84,6 +84,7 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
       }
     }
   }
+  sort($files);
   $batch = array(
     'title' => t('Adding Collection'),
     'operations' => array(),

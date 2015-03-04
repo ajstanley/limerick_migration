@@ -123,7 +123,7 @@ function limerick_add_pages($book_pid, $book_path) {
       $tiffs[] = "$book_path/$filename";
     }
   }
-
+  sort($tiffs);
   $batch = array(
     'title' => t('Adding book pages'),
     'operations' => array(),
