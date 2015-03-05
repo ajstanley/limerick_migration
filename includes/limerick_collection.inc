@@ -99,6 +99,7 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
         'dir' => $dir,
         'namespace' => $namespace,
         'collection_pid' => $collection_pid,
+        'source_path' => $source_path,
       ),
     );
   }
@@ -121,13 +122,16 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
  * @global user $user
  *
  * @param string $dir
- *   Dir anme
+ *   Dir name
  * @param string $namespace
  *   Namespace for created object
  * @param string $collection_pid
  *   PID of parent collection
+ * @parm $source_path
+ *   File path
  */
-function limerick_create_dir($dir, $namespace, $collection_pid) {
+function limerick_create_dir($dir, $namespace, $collection_pid, $source_path) {
+  module_load_include('inc', 'limerick', 'includes/utilities');
   global $user;
   $dir_parts = explode('/', $dir);
   $dir_pid = "$namespace:" . implode('-', $dir_parts);
@@ -147,6 +151,8 @@ function limerick_create_dir($dir, $namespace, $collection_pid) {
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:collectionCModel');
   $object->label = $label;
   $object->owner = $user->name;
+  $mods_path = implode('/', "$source_path/$dir_parts") . '/MODS/' . "{$label}.xml";
+  limerick_add_mods($object, $mods_path);
   islandora_add_object($object);
 }
 
@@ -181,7 +187,7 @@ function limerick_create_collection_file($file, $namespace, $collection_pid, $so
   $file_path = "$source_path/$file";
   $file_path_parts = explode('/', $file_path);
   array_pop($file_path_parts);
-  $mods_path = implode('/', $file_path_paths) . '/MODS/' . "{$label}.xml";
+  $mods_path = implode('/', $file_path_parts) . '/MODS/' . "{$label}.xml";
   $object = $tuque->repository->constructObject($namespace);
   $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $member_of);
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:sp_large_image_cmodel');
