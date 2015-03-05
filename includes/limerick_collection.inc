@@ -75,10 +75,12 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
   new RecursiveDirectoryIterator($source_path, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $item) {
     $subpath = $iterator->getSubPathName();
     if ($item->isDir()) {
-      $dirs[] = $subpath;
+      if (!substr_count($subpath, '@eaDir') && $subpath != 'MODS') {
+        $dirs[] = $subpath;
+      }
     }
     else {
-      $ext = pathinfo($subpath);
+      $ext = pathinfo($subpath, PATHINFO_EXTENSION);
       if (in_array($ext, array('tif', 'tiff'))) {
         $files[] = $subpath;
       }
