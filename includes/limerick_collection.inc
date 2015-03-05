@@ -151,7 +151,8 @@ function limerick_create_dir($dir, $namespace, $collection_pid, $source_path) {
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:collectionCModel');
   $object->label = $label;
   $object->owner = $user->name;
-  $mods_path = implode('/', "$source_path/$dir_parts") . '/MODS/' . "{$label}.xml";
+  $temp_path = implode('/', $dir_parts);
+  $mods_path = "$source_path/{$temp_path}MODS/{$label}.xml";
   limerick_add_mods($object, $mods_path);
   islandora_add_object($object);
 }
