@@ -15,7 +15,7 @@
  */
 function limerick_add_mods(&$object, $mods_path) {
   if (is_file($mods_path)) {
-    $raw_mods = file_get_contents($mods_path);
+    $raw_mods = trim(file_get_contents($mods_path));
     $dom = new DOMDocument();
     $dom->loadXML($raw_mods);
     $xpath = new DomXpath($dom);
