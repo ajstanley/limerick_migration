@@ -26,7 +26,7 @@ function limerick_migrate_image_form($form, &$form_state) {
   $form['namespace'] = array(
     '#type' => 'textfield',
     '#title' => t("Namespace"),
-    '#description' => t('Namespace for created book'),
+    '#description' => t('Namespace for created image object'),
   );
   $form['collection'] = array(
     '#type' => 'textfield',

@@ -26,7 +26,7 @@ function limerick_migrate_postcard_form($form, &$form_state) {
   $form['namespace'] = array(
     '#type' => 'textfield',
     '#title' => t("Namespace"),
-    '#description' => t('Namespace for created book'),
+    '#description' => t('Namespace for created postcard objects'),
   );
   $form['collection'] = array(
     '#type' => 'textfield',
@@ -117,10 +117,11 @@ function limerick_create_postcard($recto_path, $collection_pid, $namespace) {
   module_load_include('inc', 'islandora_large_image', 'includes/derivatives');
   $verso_path = str_replace("A.tif", 'B.tif', $recto_path);
   $paths = array($recto_path, $verso_path);
-  $mods_path = pathinfo($recto_path, PATHINFO_FILENAME) . '/MODS';
+  $mods_path = pathinfo($recto_path, PATHINFO_DIRNAME) . '/MODS';
   // Build Compound object.
   $tuque = new IslandoraTuque();
-  $label = substr(pathinfo($recto_path, PATHINFO_FILENAME), 0, strlen($label) - 1);
+  $file_name = pathinfo($recto_path, PATHINFO_FILENAME);
+  $label = substr($file_name, 0, strlen($file_name) - 1);
   $compound_object = $tuque->repository->constructObject($namespace);
   $compound_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $collection_pid);
   $compound_object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:compoundCModel');
