@@ -77,7 +77,7 @@ function limerick_migrate_book_form_validate($form, &$form_state) {
 function limerick_migrate_book_form_submit(&$form, &$form_state) {
   module_load_include('inc', 'limerick', 'includes/utilities');
   $namespace = $form_state['values']['namespace'];
-  $content_type = $namespace = $form_state['values']['content_type'];
+  $content_type = $form_state['values']['content_type'];
   $collection_pid = $form_state['values']['collection'];
   $text_path = $form_state['values']['book_dir'];
   $path_parts = explode('/', $text_path);
@@ -215,6 +215,6 @@ function limerick_create_page($tiff, $page_number, $text_object_pid, $content_mo
  */
 function limerick_update_book_thumbnail($text_object_pid) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $book_object = islandora_object_load($text_object_pid);
-  islandora_paged_content_update_paged_content_thumbnail($book_object);
+  $object = islandora_object_load($text_object_pid);
+  islandora_paged_content_update_paged_content_thumbnail($object);
 }
