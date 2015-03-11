@@ -11,8 +11,8 @@
 function limerick_menu() {
   $items = array();
   $items['limerick/migrate/book'] = array(
-    'title' => 'Book Migrations',
-    'description' => 'Migrates single identified book',
+    'title' => 'Paged Migrations',
+    'description' => 'Migrates single identified book or newspaper',
     'type' => MENU_NORMAL_ITEM,
     'page callback' => 'drupal_get_form',
     'page arguments' => array('limerick_migrate_book_form'),

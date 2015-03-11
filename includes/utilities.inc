@@ -38,3 +38,45 @@ function limerick_add_mods(&$object, $mods_path) {
     $object->ingestDatastream($mods);
   }
 }
+
+/**
+ * Gathers DC information from handles
+ *
+ * @param url $handle
+ *
+ * DSpace handle
+ * @param AbstractObject $object
+ *   Object representing digital asset
+ */
+function limerick_harvest_dc($handle, $object) {
+  $sample_handle = "http://ulir.ul.ie/handle/10344/1007";
+  module_load_include('inc', 'islandora', 'includes/dublin_core');
+  $current = NULL;
+  if ($object['DC']) {
+    $current = $object['DC']->content;
+  }
+  $dc = new DublinCore();
+  $dom = new DOMDocument();
+  @$dom->loadHTMLFile("$handle?show=full");
+  $xpath = new DomXpath($dom);
+  $metas = $xpath->query('//meta');
+  foreach ($metas as $meta) {
+    $name = $meta->getAttribute('name');
+    if (substr($name, 0, 3) == 'DC.') {
+      $name = str_replace('DC.', 'dc:', $name);
+      $value = $meta->getAttribute('content');
+      $dc->addElement($name, $value);
+    }
+  }
+  $dc_xml = $dc->asXML();
+  if ($object['DC']) {
+    $object['DC']->content = $dc_xml;
+  }
+  else{
+    $dc = $object->constructDatastream('DC');
+    $dc->label = 'DC';
+    $dc->mimetype = 'text/xml';
+    $dc->setContentFromString($dc_xml);
+    $object->ingestDatastream($dc);
+  }
+}
