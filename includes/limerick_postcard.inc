@@ -22,16 +22,24 @@ function limerick_migrate_postcard_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t("Postcard Directory"),
     '#description' => t('Full path to postcard directory'),
+    '#required' => TRUE,
   );
   $form['namespace'] = array(
     '#type' => 'textfield',
     '#title' => t("Namespace"),
     '#description' => t('Namespace for created postcard objects'),
+    '#required' => TRUE,
   );
   $form['collection'] = array(
     '#type' => 'textfield',
     '#title' => t("Collection"),
-    '#description' => t('PID of collection to which postcards are being added'),
+    '#description' => t('PID of collection to which postcards are being added'), '#required' => TRUE,
+  );
+  $form['mods_folder'] = array(
+    '#type' => 'textfield',
+    '#title' => t("MODS folder"),
+    '#description' => t('Path to folder holding name-linked MODS records'),
+    '#required' => TRUE,
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -55,6 +63,9 @@ function limerick_migrate_postcard_form_validate($form, &$form_state) {
   if (!islandora_object_load($form_state['values']['collection'])) {
     form_set_error('collection', t('Collection does not exist.'));
   }
+  if (!is_dir($form_state['values']['mods_folder'])) {
+    form_set_error('mods_folder', t('Not a valid file path.'));
+  }
 }
 
 /**
@@ -69,6 +80,7 @@ function limerick_migrate_postcard_form_submit($form, &$form_state) {
   $namespace = $form_state['values']['namespace'];
   $collection_pid = $form_state['values']['collection'];
   $source_path = $form_state['values']['source_dir'];
+  $mods_path = $form_state['values']['mods_folder'];
   $dh = opendir($source_path);
   while ($filename = readdir($dh)) {
     $ext = pathinfo($filename, PATHINFO_EXTENSION);
@@ -91,6 +103,7 @@ function limerick_migrate_postcard_form_submit($form, &$form_state) {
         'tiff' => $tiff,
         'collection_pid' => $collection_pid,
         'namespace' => $namespace,
+        'mods_path' => $mods_path,
       ),
     );
   }
@@ -110,14 +123,13 @@ function limerick_migrate_postcard_form_submit($form, &$form_state) {
  * @param string $namespace
  *   Namespace for created objects
  */
-function limerick_create_postcard($recto_path, $collection_pid, $namespace) {
+function limerick_create_postcard($recto_path, $collection_pid, $namespace, $mods_path) {
   module_load_include('inc', 'limerick', 'includes/utilities');
   global $user;
   module_load_include('inc', 'islandora_compound_object', 'includes/manage.form');
   module_load_include('inc', 'islandora_large_image', 'includes/derivatives');
   $verso_path = str_replace("A.tif", 'B.tif', $recto_path);
   $paths = array($recto_path, $verso_path);
-  $mods_path = pathinfo($recto_path, PATHINFO_DIRNAME) . '/MODS';
   // Build Compound object.
   $tuque = new IslandoraTuque();
   $file_name = pathinfo($recto_path, PATHINFO_FILENAME);
