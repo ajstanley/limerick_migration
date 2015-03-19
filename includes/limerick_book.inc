@@ -42,6 +42,12 @@ function limerick_migrate_book_form($form, &$form_state) {
     '#title' => t("Collection"),
     '#description' => t('PID of collection to which object is being added'),
   );
+  $form['mods_folder'] = array(
+    '#type' => 'textfield',
+    '#title' => t("MODS folder"),
+    '#description' => t('Path to folder holding name-linked MODS records'),
+    '#required' => TRUE,
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t("Ingest Content"),
@@ -59,10 +65,13 @@ function limerick_migrate_book_form($form, &$form_state) {
  */
 function limerick_migrate_book_form_validate($form, &$form_state) {
   if (!is_dir($form_state['values']['book_dir'])) {
-     form_set_error('book_dir', t('Not a valid file path.'));
+    form_set_error('book_dir', t('Not a valid file path.'));
   }
   if (!islandora_object_load($form_state['values']['collection'])) {
     form_set_error('collection', t('Collection does not exist.'));
+  }
+  if (!is_dir($form_state['values']['mods_folder'])) {
+    form_set_error('mods_folder', t('Not a valid file path.'));
   }
 }
 
@@ -84,7 +93,8 @@ function limerick_migrate_book_form_submit(&$form, &$form_state) {
   $title = array_pop($path_parts);
   $book_dir_path = implode('/', $path_parts);
   $object = limerick_construct_text_object($namespace, $title, $collection_pid, $content_type);
-  $mods_path = "$book_dir_path/MODS/$title.xml";
+  $mods_path = $form_state['values']['mods_folder'];
+  $mods_path .= "/$title.xml";
   limerick_add_mods($object, $mods_path);
   $new_object = islandora_add_object($object);
   limerick_add_pages($new_object->id, $text_path, $content_type);

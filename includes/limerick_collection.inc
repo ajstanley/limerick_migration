@@ -33,6 +33,13 @@ function limerick_migrate_collection_form($form, &$form_state) {
     '#title' => t("Collection"),
     '#description' => t('PID of collection to which nested collection is being added'),
   );
+  $form['mods_folder'] = array(
+    '#type' => 'textfield',
+    '#title' => t("MODS folder"),
+    '#description' => t('Path to folder holding name-linked MODS records'),
+    '#required' => TRUE,
+  );
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t("Ingest Collection"),
@@ -55,6 +62,9 @@ function limerick_migrate_collection_form_validate($form, &$form_state) {
   if (!islandora_object_load($form_state['values']['collection'])) {
     form_set_error('collection', t('Collection does not exist.'));
   }
+  if (!is_dir($form_state['values']['mods_folder'])) {
+    form_set_error('mods_folder', t('Not a valid file path.'));
+  }
 }
 
 /**
@@ -69,6 +79,7 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
   $namespace = $form_state['values']['namespace'];
   $collection_pid = $form_state['values']['collection'];
   $source_path = $form_state['values']['source_dir'];
+  $mods_path = $form_state['values']['mods_folder'];
   $dirs = array();
   $files = array();
   foreach ($iterator = new RecursiveIteratorIterator(
@@ -100,6 +111,7 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
         'namespace' => $namespace,
         'collection_pid' => $collection_pid,
         'source_path' => $source_path,
+        'mods_path' => $mods_path,
       ),
     );
   }
@@ -109,6 +121,7 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
         'namespace' => $namespace,
         'collection_pid' => $collection_pid,
         'source_path' => $source_path,
+        'mods_path' => $mods_path,
       ),
     );
   }
@@ -130,7 +143,7 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
  * @parm $source_path
  *   File path
  */
-function limerick_create_dir($dir, $namespace, $collection_pid, $source_path) {
+function limerick_create_dir($dir, $namespace, $collection_pid, $source_path, $mods_path) {
   module_load_include('inc', 'limerick', 'includes/utilities');
   global $user;
   $dir_parts = explode('/', $dir);
@@ -152,7 +165,7 @@ function limerick_create_dir($dir, $namespace, $collection_pid, $source_path) {
   $object->label = $label;
   $object->owner = $user->name;
   $temp_path = implode('/', $dir_parts);
-  $mods_path = "$source_path/{$temp_path}MODS/{$label}.xml";
+  $mods_path = "$mods_path/{$label}.xml";
   limerick_add_mods($object, $mods_path);
   islandora_add_object($object);
 }
@@ -171,7 +184,7 @@ function limerick_create_dir($dir, $namespace, $collection_pid, $source_path) {
  * @param string $source_path
  *   File Path
  */
-function limerick_create_collection_file($file, $namespace, $collection_pid, $source_path) {
+function limerick_create_collection_file($file, $namespace, $collection_pid, $source_path, $mods_path) {
   module_load_include('inc', 'limerick', 'includes/utilities');
 
   global $user;
@@ -188,7 +201,7 @@ function limerick_create_collection_file($file, $namespace, $collection_pid, $so
   $file_path = "$source_path/$file";
   $file_path_parts = explode('/', $file_path);
   array_pop($file_path_parts);
-  $mods_path = implode('/', $file_path_parts) . '/MODS/' . "{$label}.xml";
+  $mods_path = "$mods_path/{$label}.xml";
   $object = $tuque->repository->constructObject($namespace);
   $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $member_of);
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:sp_large_image_cmodel');

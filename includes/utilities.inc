@@ -27,6 +27,7 @@ function limerick_add_mods(&$object, $mods_path) {
     else {
       $titles = $xpath->query('//mods/titleInfo/title');
       $label = $titles->item(0)->nodeValue;
+      $label = html_entity_decode($label);
     }
     if ($label) {
       $object->label = $label;

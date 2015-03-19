@@ -33,6 +33,12 @@ function limerick_migrate_image_form($form, &$form_state) {
     '#title' => t("Collection"),
     '#description' => t('PID of collection to which images are being added'),
   );
+  $form['mods_folder'] = array(
+    '#type' => 'textfield',
+    '#title' => t("MODS folder"),
+    '#description' => t('Path to folder holding name-linked MODS records'),
+    '#required' => TRUE,
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t("Ingest Images"),
@@ -55,6 +61,9 @@ function limerick_migrate_image_form_validate($form, &$form_state) {
   if (!islandora_object_load($form_state['values']['collection'])) {
     form_set_error('collection', t('Collection does not exist.'));
   }
+  if (!is_dir($form_state['values']['mods_folder'])) {
+    form_set_error('mods_folder', t('Not a valid file path.'));
+  }
 }
 
 /**
@@ -69,6 +78,7 @@ function limerick_migrate_image_form_submit($form, &$form_state) {
   $namespace = $form_state['values']['namespace'];
   $collection_pid = $form_state['values']['collection'];
   $source_path = $form_state['values']['source_dir'];
+  $mods_path = $form_state['values']['mods_folder'];
   $dh = opendir($source_path);
   while ($filename = readdir($dh)) {
     $ext = pathinfo($filename, PATHINFO_EXTENSION);
@@ -88,7 +98,8 @@ function limerick_migrate_image_form_submit($form, &$form_state) {
         'tiff' => $tiff,
         'collection_pid' => $collection_pid,
         'namespace' => $namespace,
-      ));
+        'mods_path' => $mods_path,
+    ));
   }
   batch_set($batch);
   batch_process();
@@ -106,13 +117,13 @@ function limerick_migrate_image_form_submit($form, &$form_state) {
  * @param string $namespace
  *   Namespace for ingested object
  */
-function limerick_create_image($tiff, $collection_pid, $namespace) {
+function limerick_create_image($tiff, $collection_pid, $namespace, $mods_path) {
   module_load_include('inc', 'limerick', 'includes/utilities');
   global $user;
   $tuque = new IslandoraTuque();
   $basename = pathinfo($tiff, PATHINFO_FILENAME);
   $dirname = pathinfo($tiff, PATHINFO_DIRNAME);
-  $mods_path = "$dirname/MODS/{$basename}.xml";
+  $mods_path = "$mods_path/{$basename}.xml";
   $object = $tuque->repository->constructObject($namespace);
   $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $collection_pid);
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:sp_large_image_cmodel');
