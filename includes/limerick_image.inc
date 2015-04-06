@@ -80,6 +80,7 @@ function limerick_migrate_image_form_submit($form, &$form_state) {
   $source_path = $form_state['values']['source_dir'];
   $mods_path = $form_state['values']['mods_folder'];
   $dh = opendir($source_path);
+  $tiffs = array();
   while ($filename = readdir($dh)) {
     $ext = pathinfo($filename, PATHINFO_EXTENSION);
     if (in_array($ext, array('tiff', 'tif'))) {

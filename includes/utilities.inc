@@ -81,3 +81,27 @@ function limerick_harvest_dc($handle, $object) {
     $object->ingestDatastream($dc);
   }
 }
+
+function limerick_extract_mods($record_path, $destination_path) {
+  $collection = trim(file_get_contents($record_path));
+  $dom = new DOMDocument();
+  $dom->loadXML($collection);
+  $xpath = new DomXpath($dom);
+  $xpath->registerNamespace('mods', 'http://www.loc.gov/mods/v3');
+  $mods = $xpath->query('//mods:mods');
+  foreach ($mods as $record) {
+    $mods_dom = new DOMDocument();
+    $mods_dom->loadXML($dom->saveXML($record));
+    $root = $mods_dom->documentElement;
+    $root->appendChild($mods_dom->createAttribute('xmlns:xsi'))->appendChild($mods_dom->createTextNode("http://www.w3.org/2001/XMLSchema-instance"));
+    $root->appendChild($mods_dom->createAttribute('xsi:schemaLocation'))->appendChild($mods_dom->createTextNode("http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-0.xsd"));
+    $root->appendChild($mods_dom->createAttribute('xmlns'))->appendChild($mods_dom->createTextNode("http://www.loc.gov/mods/v3"));
+    $mods_xpath = new DomXpath($dom);
+    $mods_xpath->registerNamespace('mods', 'http://www.loc.gov/mods/v3');
+    $identifiers = $xpath->query('//mods:mods/mods:identifier[@type = "uri"]');
+    $identifier = $identifiers->item(0);
+    $file = $identifier->nodeValue . ".xml";
+    $contents = $mods_dom->saveXML();
+    file_put_contents("$destination_path/$file", $contents);
+  }
+}

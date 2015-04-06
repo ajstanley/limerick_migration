@@ -149,6 +149,7 @@ function limerick_add_pages($text_object_pid, $text_path, $content_type) {
   );
   $content_model = $mappings[$content_type];
   $dh = opendir($text_path);
+  $tiffs = array();
   while ($filename = readdir($dh)) {
     $ext = pathinfo($filename, PATHINFO_EXTENSION);
     if (in_array($ext, array('tiff', 'tif'))) {
