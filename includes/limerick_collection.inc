@@ -76,6 +76,11 @@ function limerick_migrate_collection_form_validate($form, &$form_state) {
  *   Drupal form state
  */
 function limerick_migrate_collection_form_submit($form, &$form_state) {
+  $do_not_touch = array (
+    '@eaDir',
+    'thumb',
+    'undo',
+  );
   $namespace = $form_state['values']['namespace'];
   $collection_pid = $form_state['values']['collection'];
   $source_path = $form_state['values']['source_dir'];
@@ -86,7 +91,7 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
   new RecursiveDirectoryIterator($source_path, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $item) {
     $subpath = $iterator->getSubPathName();
     if ($item->isDir()) {
-      if (!substr_count($subpath, '@eaDir') && $subpath != 'MODS') {
+      if (!in_array($subpath, $do_not_touch)) {
         $dirs[] = $subpath;
       }
     }
