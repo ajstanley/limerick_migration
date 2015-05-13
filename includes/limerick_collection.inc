@@ -76,11 +76,6 @@ function limerick_migrate_collection_form_validate($form, &$form_state) {
  *   Drupal form state
  */
 function limerick_migrate_collection_form_submit($form, &$form_state) {
-  $do_not_touch = array (
-    '@eaDir',
-    'thumb',
-    'undo',
-  );
   $namespace = $form_state['values']['namespace'];
   $collection_pid = $form_state['values']['collection'];
   $source_path = $form_state['values']['source_dir'];
@@ -91,7 +86,8 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
   new RecursiveDirectoryIterator($source_path, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $item) {
     $subpath = $iterator->getSubPathName();
     if ($item->isDir()) {
-      if (!in_array($subpath, $do_not_touch)) {
+
+      if (!substr_count($subpath, 'tmpFilename') && !substr_count($subpath, '@eaDir') && !substr_count($subpath, 'thumb') && !substr_count($subpath, 'undo') && $subpath != 'MODS') {
         $dirs[] = $subpath;
       }
     }
@@ -151,8 +147,16 @@ function limerick_migrate_collection_form_submit($form, &$form_state) {
 function limerick_create_dir($dir, $namespace, $collection_pid, $source_path, $mods_path) {
   module_load_include('inc', 'limerick', 'includes/utilities');
   global $user;
+  // renames bad filenames that make illegal pids..
+  $bad_chars = array('(', ')');
+  $fixed_dir = str_replace($bad_chars, '', $dir);
+  if ($fixed_dir != $dir) {
+    rename($dir, $fixed_dir);
+  }
+  $dir = $fixed_dir;
   $dir_parts = explode('/', $dir);
-  $dir_pid = "$namespace:" . implode('-', $dir_parts);
+  $qualifier = implode('-', $dir_parts);
+  $dir_pid = "$namespace:$qualifier";
   if (islandora_object_load($dir_pid)) {
     return;
   }
